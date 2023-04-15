@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Master;
+namespace App\Http\Controllers\API;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Redirect;
 
 
-class BarangController extends Controller
+class DataBarangController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -19,24 +19,11 @@ class BarangController extends Controller
      */
     public function index()
     {
-        #ELOQUENT
-        $totalBarang = Barang::select('id')
-            ->where('stok','>=',10)->whereBetween('harga',[5000, 15000])
-            ->sum('stok');
-
-        #ELOQUENT KOMBINASI RAW
-        $totalHarga = Barang::select(DB::Raw('sum(harga) as totalHarga'))
-            ->where('stok','>=',10)->whereBetween('harga',[5000, 15000])
-            ->first();
-
-
         $listBarang = Barang::select('code','name','id','stok')
-        ->where(function($q){
-            $q->where('code','like','%kode%')->orWhere('name','like','%kode%');
-        })
-        ->where('stok','>=',10)->whereBetween('harga',[5000, 15000])->get();
+        //->where('stok','>=',10)->whereBetween('harga',[5000, 15000])
+        ->get();
 
-        return view('master.listbarang', compact('listBarang', 'totalBarang','totalHarga'));
+        return response()->json(['message' => 'Data tersedia', 'data' => $listBarang ], 200);
     }
 
     /**
@@ -46,7 +33,7 @@ class BarangController extends Controller
      */
     public function create()
     {
-        return view('master.formbarang');
+        
     }
 
     /**
@@ -60,27 +47,27 @@ class BarangController extends Controller
         #setting
         $input = $request->all();
         $validator = Validator::make($input, [
-            'code' => 'required|unique:code',
+            'code' => 'required|unique:barang,code',
             'name' => 'required'
         ]);
         #RETURN VALIDATOR
         if($validator->fails())
         {
             $messages = $validator->messages();
-            return Redirect::back()->withErrors($messages)->withInput($request->all());
+            return response()->json(['message' => 'error', 'data' => $messages ], 400);            
         }
 
         #ELOQUENT
-        $barang = new Barang();
+        /* $barang = new Barang();
         $barang->code = $request->input('code');
         $barang->name = $request->input('name');
-        $barang->save();
+        $barang->save(); */
 
         #QUERY BUILDER
         DB::table('barang')->insert(['code'=>$request->input('code'),
         'name'=>$request->input('name')]);
 
-        return redirect('barang');
+        return response()->json(['message' => 'data berhasil', 'data' => 'berhasil disubmit' ], 201);
     }
 
     /**
@@ -93,8 +80,7 @@ class BarangController extends Controller
     {
         $detail = Barang::find($id); //DB::table('barang')->where('id', $id)->first();
 
-        return view('master.viewbarang', compact('detail'));
-
+        return response()->json(['message' => 'Data tersedia', 'data' => $detail ], 200);
     }
 
     /**
@@ -107,7 +93,7 @@ class BarangController extends Controller
     {
         $detail = Barang::find($id); //DB::table('barang')->where('id', $id)->first();
 
-        return view('master.editbarang', compact('detail'));
+        return response()->json(['message' => 'Data tersedia', 'data' => $detail ], 200);
     }
 
     /**
@@ -122,14 +108,14 @@ class BarangController extends Controller
         #setting
         $input = $request->all();
         $validator = Validator::make($input, [
-            'kode_barang' => 'required',
-            'nama_barang' => 'required'
+            'code' => 'required',
+            'name' => 'required'
         ]);
         #RETURN VALIDATOR
         if($validator->fails())
         {
             $messages = $validator->messages();
-            return Redirect::back()->withErrors($messages)->withInput($request->all());
+            return response()->json(['message' => 'error', 'data' => $messages ], 400);            
         }
 
         #ELOQUENT
@@ -142,7 +128,7 @@ class BarangController extends Controller
         DB::table('barang')->where('id', $id)->update(['code'=>$request->input('code'),
         'name'=>$request->input('name')]);
 
-        return redirect('listbarang');
+        return response()->json(['message' => 'data berhasil', 'data' => 'berhasil diupdate' ], 201);
     }
 
     /**
@@ -158,9 +144,31 @@ class BarangController extends Controller
         ->update(['deleted_at'=> date('Y-m-d')]);
 
         #HARD DELETE
-        DB::table('barang')->where('id',$id)->deleted();
+        #DB::table('barang')->where('id',$id)->deleted();
+
+        return response()->json(['message' => 'data berhasil', 'data' => 'berhasil dihapus' ], 201);
+    }
 
 
-        return redirect('master/barang');
+    #CUSTOM FUNCTION
+    public function updateByCode(Request $request)
+    {
+        #setting
+        $input = $request->all();
+        $validator = Validator::make($input, [
+            'code' => 'required',
+            'name' => 'required'
+        ]);
+        #RETURN VALIDATOR
+        if($validator->fails())
+        {
+            $messages = $validator->messages();
+            return response()->json(['message' => 'error', 'data' => $messages ], 400);            
+        }
+
+        #QUERY BUILDER
+        DB::table('barang')->where('code', $request->input('code'))->update(['name'=>$request->input('name')]);
+
+        return response()->json(['message' => 'data berhasil', 'data' => 'berhasil diupdate' ], 201);
     }
 }

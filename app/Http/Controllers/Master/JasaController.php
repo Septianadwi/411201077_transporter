@@ -4,13 +4,11 @@ namespace App\Http\Controllers\Master;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Models\Barang;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Redirect;
 
-
-class BarangController extends Controller
+class JasaController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -20,23 +18,19 @@ class BarangController extends Controller
     public function index()
     {
         #ELOQUENT
-        $totalBarang = Barang::select('id')
+        $totalBarang = Jasa::select('id')
             ->where('stok','>=',10)->whereBetween('harga',[5000, 15000])
             ->sum('stok');
 
         #ELOQUENT KOMBINASI RAW
-        $totalHarga = Barang::select(DB::Raw('sum(harga) as totalHarga'))
+        $totalHarga = Jasa::select(DB::Raw('sum(harga) as totalHarga'))
             ->where('stok','>=',10)->whereBetween('harga',[5000, 15000])
             ->first();
 
 
-        $listBarang = Barang::select('code','name','id','stok')
-        ->where(function($q){
-            $q->where('code','like','%kode%')->orWhere('name','like','%kode%');
-        })
-        ->where('stok','>=',10)->whereBetween('harga',[5000, 15000])->get();
+        $listBarang = Jasa::select('code','name','id')->get();
 
-        return view('master.listbarang', compact('listBarang', 'totalBarang','totalHarga'));
+        return view('master.listjasa', compact('listBarang', 'totalBarang','totalHarga'));
     }
 
     /**
@@ -46,7 +40,7 @@ class BarangController extends Controller
      */
     public function create()
     {
-        return view('master.formbarang');
+        return view('master.formjasa');
     }
 
     /**
@@ -57,30 +51,30 @@ class BarangController extends Controller
      */
     public function store(Request $request)
     {
-        #setting
-        $input = $request->all();
-        $validator = Validator::make($input, [
-            'code' => 'required|unique:code',
-            'name' => 'required'
-        ]);
-        #RETURN VALIDATOR
-        if($validator->fails())
-        {
-            $messages = $validator->messages();
-            return Redirect::back()->withErrors($messages)->withInput($request->all());
-        }
-
-        #ELOQUENT
-        $barang = new Barang();
-        $barang->code = $request->input('code');
-        $barang->name = $request->input('name');
-        $barang->save();
-
-        #QUERY BUILDER
-        DB::table('barang')->insert(['code'=>$request->input('code'),
-        'name'=>$request->input('name')]);
-
-        return redirect('barang');
+         #setting
+         $input = $request->all();
+         $validator = Validator::make($input, [
+             'code' => 'required|unique:code',
+             'name' => 'required'
+         ]);
+         #RETURN VALIDATOR
+         if($validator->fails())
+         {
+             $messages = $validator->messages();
+             return Redirect::back()->withErrors($messages)->withInput($request->all());
+         }
+ 
+         #ELOQUENT
+         $barang = new Jasa();
+         $barang->code = $request->input('code');
+         $barang->name = $request->input('name');
+         $barang->save();
+ 
+         #QUERY BUILDER
+         DB::table('jasa')->insert(['code'=>$request->input('code'),
+         'name'=>$request->input('name')]);
+ 
+         return redirect('jasa');
     }
 
     /**
@@ -91,10 +85,9 @@ class BarangController extends Controller
      */
     public function show($id)
     {
-        $detail = Barang::find($id); //DB::table('barang')->where('id', $id)->first();
+        $detail = Jasa::find($id); //DB::table('barang')->where('id', $id)->first();
 
-        return view('master.viewbarang', compact('detail'));
-
+        return view('master.viewjasa', compact('detail'));
     }
 
     /**
@@ -105,9 +98,9 @@ class BarangController extends Controller
      */
     public function edit($id)
     {
-        $detail = Barang::find($id); //DB::table('barang')->where('id', $id)->first();
+        $detail = Jasa::find($id); //DB::table('barang')->where('id', $id)->first();
 
-        return view('master.editbarang', compact('detail'));
+        return view('master.editjasa', compact('detail'));
     }
 
     /**
@@ -122,8 +115,8 @@ class BarangController extends Controller
         #setting
         $input = $request->all();
         $validator = Validator::make($input, [
-            'kode_barang' => 'required',
-            'nama_barang' => 'required'
+            'code' => 'required',
+            'name' => 'required'
         ]);
         #RETURN VALIDATOR
         if($validator->fails())
@@ -133,16 +126,16 @@ class BarangController extends Controller
         }
 
         #ELOQUENT
-        $barang = Barang::find($id);
+        $barang = Jasa::find($id);
         $barang->code = $request->input('code');
         $barang->name = $request->input('name');
         $barang->save();
 
         #QUERY BUILDER
-        DB::table('barang')->where('id', $id)->update(['code'=>$request->input('code'),
+        DB::table('jasa')->where('id', $id)->update(['code'=>$request->input('code'),
         'name'=>$request->input('name')]);
 
-        return redirect('listbarang');
+        return redirect('barang');
     }
 
     /**
@@ -154,13 +147,13 @@ class BarangController extends Controller
     public function destroy($id)
     {
         #SOFT DELETE
-        DB::table('barang')->where('id',$id)
+        DB::table('jasa')->where('id',$id)
         ->update(['deleted_at'=> date('Y-m-d')]);
 
         #HARD DELETE
-        DB::table('barang')->where('id',$id)->deleted();
+        DB::table('jasa')->where('id',$id)->deleted();
 
 
-        return redirect('master/barang');
+        return redirect('master/jasa');
     }
 }

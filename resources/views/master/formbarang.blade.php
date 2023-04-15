@@ -81,28 +81,25 @@
 
             <div class="content">
                 <div class="title m-b-md">
-                    Total Stok : {{ $totalBarang }}
+                    Form Barang
                 </div>
-                <div class="title m-b-md">
-                    Total Harga : {{ $totalHarga->totalHarga }}
-                </div>
-                <div class="m-b-md">
-                    <a href="{{ url('barang/create') }}" class="btn btn-primary">Create</a>
-                </div>
-                <table>
-                    <tr>
-                        <th>Kode Barang</th>
-                        <th>Nama Barang</th>
-                        <th>Stok</th>
-                    </tr>
-                    @foreach($listBarang as $value)
-                    <tr>
-                        <td>{{ $value->code }}</td>
-                        <td>{{ $value->name }}</td>
-                        <td>{{ $value->stok }}</td>
-                    </tr>
+                <div>
+                @if($errors)
+                    <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
                     @endforeach
-                </table>                
+                    </ul>
+                @endif
+                </div>
+                <div>
+                    <form method="post" action="{{ url('barang') }}">
+                        @csrf
+                        <input type="text" name="code">
+                        <input type="text" name="name">
+                         <button type="submit" class="btn btn-primary" >Submit</button>
+                    </form>
+                </div>             
             </div>
         </div>
     </body>
