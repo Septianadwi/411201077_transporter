@@ -17,7 +17,9 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('listproduk', 'API\ProdukController@listProduk');
+Route::group(['middleware' => 'auth:api'], function(){
+    Route::get('listproduk', 'API\ProdukController@listProduk');
 
-Route::patch('databarang/updatecode','API\DataBarangController@updateByCode');
-Route::resource('databarang','API\DataBarangController');
+    Route::patch('databarang/updatecode','API\DataBarangController@updateByCode');
+    Route::resource('databarang','API\DataBarangController');
+});
