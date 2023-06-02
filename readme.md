@@ -1,6 +1,6 @@
 <br> Nim: 411201077 </br>
-Nama: Septiana Dwi Purnaningsih
-Jurusan: Teknik Informatika sabtu pagi
+<br> Nama: Septiana Dwi Purnaningsih</br>
+<br>Jurusan: Teknik Informatika sabtu pagi</br>
 
 Note: belum bisa melanjutkan untuk proses rest API, karena ada kendala di version PHP dan Xampp yaitu web server tidak running. Dan sudah dicoba mengganti localhost tapi ada require yang belum pas, sehingga tidak dapat melihat perubahan code di web server.
 
